@@ -267,3 +267,4 @@ external-deps/python-lsp-server/.installation-dir/
 *.vsix
 /data/kaggle.csv
 /data/goodreads.json
+/data/openlibrary.txt
