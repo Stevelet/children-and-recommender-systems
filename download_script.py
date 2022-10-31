@@ -10,25 +10,25 @@ openlibrary_url = "https://openlibrary.org/data/ol_dump_latest.txt.gz"
 
 
 def download_zip(source_url, source_name, target_name, data_extension):
-    if not os.path.isfile("data/"+target_name+"."+data_extension):
-        print("downloading "+target_name+"...")
-        urllib.request.urlretrieve(source_url, "data/"+target_name+"_source.zip")
-        with zipfile.ZipFile("data/"+target_name+"_source.zip", 'r') as zip_ref:
+    if not os.path.isfile("data/" + target_name + "." + data_extension):
+        print("downloading " + target_name + "...")
+        urllib.request.urlretrieve(source_url, "data/" + target_name + "_source.zip")
+        with zipfile.ZipFile("data/" + target_name + "_source.zip", 'r') as zip_ref:
             zip_ref.extractall("data")
-        os.remove("data/"+target_name+"_source.zip")
-        os.rename("data/"+source_name+"."+data_extension, "data/"+target_name+"."+data_extension)
-        print(target_name+" complete")
+        os.remove("data/" + target_name + "_source.zip")
+        os.rename("data/" + source_name + "." + data_extension, "data/" + target_name + "." + data_extension)
+        print(target_name + " complete")
 
 
 def download_gz(source_url, target_name, data_extension):
-    if not os.path.isfile("data/"+target_name+"."+data_extension):
-        print("downloading "+target_name+"...")
-        urllib.request.urlretrieve(source_url, "data/" + target_name + "_source."+data_extension+".gz")
-        with gzip.open("data/" + target_name + "_source."+data_extension+".gz", 'rb') as f_in:
-            with open("data/" + target_name + "."+data_extension, 'wb') as f_out:
+    if not os.path.isfile("data/" + target_name + "." + data_extension):
+        print("downloading " + target_name + "...")
+        urllib.request.urlretrieve(source_url, "data/" + target_name + "_source." + data_extension + ".gz")
+        with gzip.open("data/" + target_name + "_source." + data_extension + ".gz", 'rb') as f_in:
+            with open("data/" + target_name + "." + data_extension, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
-        os.remove("data/" + target_name + "_source."+data_extension+".gz")
-        print(target_name+" complete")
+        os.remove("data/" + target_name + "_source." + data_extension + ".gz")
+        print(target_name + " complete")
 
 
 download_zip(kaggle_url, "children_books", "kaggle", "csv")
