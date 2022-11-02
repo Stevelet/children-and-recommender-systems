@@ -6,15 +6,19 @@ index_header = {"tag": "span", "id": "Works_by_age"}
 index_end = {"tag": "span", "id": "About"}
 
 class IndexParser(HTMLParser):
-    book_url_dict = {}
+    def __init__(self):
+        super().__init__()
 
-    index_started = False
-    parse_next_data = 0
+        self.book_url_dict = {}
 
-    current_category = ""
-    current_book_href = ""
-    current_author = ""
-    current_date = ""
+        self.index_started = False
+        self.parse_next_data = 0
+
+        self.current_category = ""
+        self.current_book_href = ""
+        self.current_author = ""
+        self.current_date = ""
+        self.current_book_title = ""
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr_dict = dict(attrs)
@@ -38,6 +42,7 @@ class IndexParser(HTMLParser):
                 if len(self.current_book_href) > 0:
                     self.append_current_book()
                 self.current_book_href = attr_dict["href"]
+                self.current_book_title = attr_dict["title"]
 
     def handle_data(self, data: str) -> None:
         if self.parse_next_data > 0:
@@ -51,10 +56,11 @@ class IndexParser(HTMLParser):
     def append_current_book(self):
         if self.current_category not in self.book_url_dict:
             self.book_url_dict[self.current_category] = []
-        self.book_url_dict[self.current_category].append((self.current_book_href, self.current_author, self.current_date))
+        self.book_url_dict[self.current_category].append((self.current_book_href, self.current_book_title, self.current_author, self.current_date))
         self.current_book_href = ""
         self.current_author = ""
         self.current_date = ""
+        self.current_book_title = ""
 
 
     def retrieve_result(self):
