@@ -65,14 +65,17 @@ for book_tuple in base_book_list:
     book_path = get_or_create_dir(os.path.join(data_path, "fulltext"), book_name)
 
     for chapter_tuple in chapter_list:
+        chapter_name = make_path_safe('_'.join(chapter_tuple[0].split('/')[1:]))
+
+        chapter_path = os.path.join(book_path, chapter_name + '.txt')
+
+        if os.path.exists(chapter_path):
+            continue
+
         chapter_html = retrieve_html(url_root + chapter_tuple[1])
         chapter_parser = ChapterParser()
         chapter_parser.feed(chapter_html)
         chapter_text = chapter_parser.retrieve_text().strip()
-
-        chapter_name = make_path_safe('_'.join(chapter_tuple[0].split('/')[1:]))
-
-        chapter_path = os.path.join(book_path, chapter_name + '.txt')
 
         with open(chapter_path, 'w') as file:
             file.write(unicodedata.normalize('NFKD', chapter_text).encode('ascii', 'ignore').decode("utf-8"))
