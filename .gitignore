@@ -267,3 +267,4 @@ external-deps/python-lsp-server/.installation-dir/
 *.vsix
 
 *.csv
+*.json.gz
