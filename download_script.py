@@ -19,7 +19,7 @@ def initialize():
     if not os.path.isfile("data/combined_dataset.csv"):
         with open("data/combined_dataset.csv", 'w', newline='') as f:
             wr = csv.writer(f)
-            wr.writerow(["isbn", "goodreads_id", "amazon_id", "book_id", "title", "series", "authors", "artists", "publisher", "publication_year", "publication_country", "number_of_pages", "number_of_chapters", "dimensions", "weight", "format", "cover_image", "full_text", "subject", "description", "interest_age", "recommended_age", " similar_books", "average_rating", "rating_count", "text_review_count"])
+            wr.writerow(["isbn", "goodreads_id", "amazon_id", "book_id", "title", "series", "authors", "artists", "publisher", "publication_year", "publication_country", "number_of_pages", "number_of_chapters", "dimensions", "weight", "format", "cover_image", "full_text", "subject", "description", "interest_age", "recommended_age", "similar_books", "average_rating", "rating_count", "text_review_count"])
 
 
 def download_zip(source_url, source_name, target_name, data_extension):
