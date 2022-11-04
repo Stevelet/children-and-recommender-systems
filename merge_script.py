@@ -25,5 +25,9 @@ with open("data/goodreads.json", 'r') as f_j:
 
             if j["isbn"] != "":
                 if j["language_code"] in language_whitelist:
-                    writer.writerow([j["isbn"]])
-                    print(j)
+                    csv_row = [
+                        j["isbn"],
+                        int((j["url"].removeprefix("https://www.goodreads.com/book/show/").split('.')[0].split('-')[0]))
+                    ]
+
+                    writer.writerow(csv_row)
