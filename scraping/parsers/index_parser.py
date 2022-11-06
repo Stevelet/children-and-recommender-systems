@@ -64,5 +64,5 @@ class IndexParser(HTMLParser):
 
 
     def retrieve_result(self):
-        self.book_url_dict[self.current_category].append((self.current_book_href, self.current_author, self.current_date))
+        self.append_current_book()
         return self.book_url_dict
