@@ -68,7 +68,8 @@ def show_progress(count, block_size, total_size):
     sys.stdout.flush()
 
 
-initialize()
-download_zip(kaggle_url, "children_books", "kaggle", "csv")
-download_gz(goodreads_url, "goodreads", "json")
-download_gz(openlibrary_url, "openlibrary", "txt")
+def download_all():
+    initialize()
+    download_zip(kaggle_url, "children_books", "kaggle", "csv")
+    download_gz(goodreads_url, "goodreads", "json")
+    download_gz(openlibrary_url, "openlibrary", "txt")
