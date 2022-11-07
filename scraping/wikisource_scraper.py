@@ -1,7 +1,7 @@
 from urllib.request import urlopen
-from parsers.index_parser import IndexParser
-from parsers.book_parser import BookParser
-from parsers.chapter_parser import ChapterParser
+from scraping.parsers.index_parser import IndexParser
+from scraping.parsers.book_parser import BookParser
+from scraping.parsers.chapter_parser import ChapterParser
 import re
 import os.path
 import unicodedata
@@ -46,6 +46,7 @@ def retrieve_html(url):
         response.close()
         return str(html)
 
+
 def clean_hexadecimal(raw_str, remove=True):
     """
     Convert hexadecimal strings to their corresponding character or remove them entirely.
@@ -59,6 +60,7 @@ def clean_hexadecimal(raw_str, remove=True):
     for match in matches:
         cleaned_string = cleaned_string.replace(match, '' if remove else chr(int("".join(match[2:4]), 16)))
     return cleaned_string
+
 
 def sanitize_file(file_path):
     """
@@ -205,8 +207,3 @@ def download_wikisource(data_path):
         for chapter_path in chapter_list:
             sanitize_file(chapter_path)
     return book_details
-
-
-# Example of call
-local_data_path = os.path.join(os.getcwd(), '..', 'data')
-# download_wikisource(local_data_path)

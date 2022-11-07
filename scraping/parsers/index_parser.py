@@ -5,6 +5,7 @@ import re
 index_header = {"tag": "span", "id": "Works_by_age"}
 index_end = {"tag": "span", "id": "About"}
 
+
 class IndexParser(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -61,7 +62,6 @@ class IndexParser(HTMLParser):
         self.current_author = ""
         self.current_date = ""
         self.current_book_title = ""
-
 
     def retrieve_result(self):
         self.append_current_book()
