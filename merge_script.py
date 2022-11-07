@@ -75,22 +75,23 @@ def merge_goodreads():
 
 
 # Kaggle
-with open("data/kaggle.csv", 'r') as f:
-    all_titles = []
+def merge_kaggle():
+    with open("data/kaggle.csv", 'r') as f:
+        all_titles = []
 
-    r = csv.reader(f)
-    for row in r:
-        all_titles.append(row[0])
-        # print(row)
+        r = csv.reader(f)
+        for row in r:
+            all_titles.append(row[0])
+            # print(row)
 
-    print(all_titles)
+        print(all_titles)
 
-    with open("data/combined_dataset.csv", 'r') as c:
-        l = csv.reader(c)
+        with open("data/combined_dataset.csv", 'r') as c:
+            l = csv.reader(c)
 
-        for x in l:
-            if x[4] in all_titles:
-                print(x[4])
+            for x in l:
+                if x[4] in all_titles:
+                    print(x[4])
 
 
 def merge_all():
