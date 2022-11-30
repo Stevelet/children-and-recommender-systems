@@ -9,7 +9,7 @@ class ChapterParser(HTMLParser):
         self.tag_stack = []
         self.data = ""
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+    def handle_starttag(self, tag, attrs):
         attr_dict = dict(attrs)
 
         self.tag_stack.append(tag)

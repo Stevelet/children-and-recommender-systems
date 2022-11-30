@@ -20,7 +20,7 @@ class IndexParser(HTMLParser):
         self.current_date = ""
         self.current_book_title = ""
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+    def handle_starttag(self, tag, attrs):
         attr_dict = dict(attrs)
         if tag == index_header["tag"] and "id" in attr_dict.keys() and attr_dict["id"] == index_header["id"]:
             self.index_started = True

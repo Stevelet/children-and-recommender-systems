@@ -11,7 +11,7 @@ class BookParser(HTMLParser):
         self.disambiguation = []
         self.single_chapter_book = False
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+    def handle_starttag(self, tag, attrs):
         attr_dict = dict(attrs)
 
         if tag == 'a' and "href" in attr_dict.keys() and self.url_suffix + '/' in attr_dict["href"]:

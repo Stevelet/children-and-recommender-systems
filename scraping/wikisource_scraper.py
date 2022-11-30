@@ -5,6 +5,8 @@ from parsers.chapter_parser import ChapterParser
 import re
 import os.path
 import unicodedata
+from download_script import show_progress
+from database.database_connector import create_connection
 
 url_root = "https://en.wikisource.org"
 base_url = url_root + "/wiki/Portal:Children%27s_literature"
@@ -46,6 +48,7 @@ def retrieve_html(url):
         response.close()
         return str(html)
 
+
 def clean_hexadecimal(raw_str, remove=True):
     """
     Convert hexadecimal strings to their corresponding character or remove them entirely.
@@ -59,6 +62,7 @@ def clean_hexadecimal(raw_str, remove=True):
     for match in matches:
         cleaned_string = cleaned_string.replace(match, '' if remove else chr(int("".join(match[2:4]), 16)))
     return cleaned_string
+
 
 def sanitize_file(file_path):
     """
@@ -112,7 +116,9 @@ def retrieve_book_details(data_path):
 
     parsed_count = 0
 
-    for book_tuple in base_book_list:
+    print("Retrieving book details")
+    for count, book_tuple in enumerate(base_book_list):
+        show_progress(count, 1, len(base_book_list))
         # print(book_tuple)
         book_parser = BookParser(book_tuple[0])
         raw_html = retrieve_html(url_root + book_tuple[0])
@@ -156,7 +162,7 @@ def store_book_details(data_path, book_tuples):
         file.write(csv_string)
 
 
-def store_book_chapters(data_path, book_tuples):
+def store_book_chapters(data_path, book_tuples, force):
     """
     Store the chapters found during book parsing to files
 
@@ -165,7 +171,10 @@ def store_book_chapters(data_path, book_tuples):
     :return:
     """
     chapter_matrix = []
-    for book_tuple in book_tuples:
+    print("\nRetrieving book chapters")
+    for count, book_tuple in enumerate(book_tuples):
+        show_progress(count, 1, len(book_tuples))
+
         book_path = data_path + book_tuple[6]
         chapter_list = []
 
@@ -176,7 +185,7 @@ def store_book_chapters(data_path, book_tuples):
 
             chapter_list.append(chapter_path)
 
-            if os.path.exists(chapter_path):
+            if os.path.exists(chapter_path) and not force:
                 continue
 
             chapter_html = retrieve_html(url_root + chapter_tuple[1])
@@ -191,22 +200,51 @@ def store_book_chapters(data_path, book_tuples):
     return chapter_matrix
 
 
-def download_wikisource(data_path):
+def download_wikisource(data_path, force=False):
     """
     Download as many of the wikisource books as possible.
 
     :param data_path: Path to the data directory
+    :param force: Force redownload even if present
     :return: A list of tuples corresponding to the csv file that is generated
     """
     book_details = retrieve_book_details(data_path)
     store_book_details(data_path, book_details)
-    chapter_matrix = store_book_chapters(data_path, book_details)
-    for chapter_list in chapter_matrix:
+    chapter_matrix = store_book_chapters(data_path, book_details, force)
+    print("\nSanitizing chapters")
+    for count, chapter_list in enumerate(chapter_matrix):
+        show_progress(count, 1, len(chapter_matrix))
         for chapter_path in chapter_list:
             sanitize_file(chapter_path)
-    return book_details
+    print('\n')
+    return book_details, chapter_matrix
 
 
 # Example of call
 local_data_path = os.path.join(os.getcwd(), '..', 'data')
-# download_wikisource(local_data_path)
+book_details, chapter_matrix = download_wikisource(local_data_path, False)
+
+print(chapter_matrix)
+
+conn, _ = create_connection()
+
+cursor = conn.cursor()
+
+indexed_tuples = []
+for index, book_tuple in enumerate(book_details):
+    print(book_tuple)
+    indexed_tuples.append((index,) + book_tuple[:-1])
+
+
+chapter_tuples = []
+for book_index, chapter_list in enumerate(chapter_matrix):
+    for chapter_index, chapter in enumerate(chapter_list):
+        chapter_tuples.append(str((book_index, chapter_index, 0, chapter)))
+
+
+cursor.executemany("INSERT INTO book VALUES (?,?,?,?,?,?,?,?)", indexed_tuples)
+# cursor.execute("INSERT INTO chapter VALUES " + tuple_string)
+conn.commit()
+
+for row in cursor.execute("SELECT * FROM book"):
+    print(row)
