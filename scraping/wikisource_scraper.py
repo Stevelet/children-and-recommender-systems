@@ -1,3 +1,4 @@
+import json
 from urllib.request import urlopen
 from parsers.index_parser import IndexParser
 from parsers.book_parser import BookParser
@@ -7,6 +8,7 @@ import os.path
 import unicodedata
 from download_script import show_progress
 from database.database_connector import create_connection
+from util import path as path_util
 
 url_root = "https://en.wikisource.org"
 base_url = url_root + "/wiki/Portal:Children%27s_literature"
@@ -25,15 +27,6 @@ def get_or_create_dir(path, dirname):
         os.mkdir(full_path)
     return full_path
 
-
-def make_path_safe(raw_path):
-    """
-    Parse string to path string for file storage.
-
-    :param raw_path: Path
-    :return: Path without special characters
-    """
-    return re.sub(r'[^a-zA-Z\d()]', '_', raw_path)
 
 
 def retrieve_html(url):
@@ -130,11 +123,11 @@ def retrieve_book_details(data_path):
         else:
             continue  # TODO handle other book types
 
-        book_name = make_path_safe(book_tuple[1])
+        book_name = path_util.make_path_safe(book_tuple[1])
 
-        book_path = get_or_create_dir(os.path.join(data_path, "fulltext"), book_name)
+        book_path = get_or_create_dir(os.path.join(str(data_path), "fulltext"), book_name)
 
-        full_tuple = book_tuple + (len(chapter_list), book_path.replace(data_path, ''), chapter_list)
+        full_tuple = book_tuple + (len(chapter_list), str(book_path).replace(str(data_path), ''), chapter_list)
 
         final_book_list.append(full_tuple)
 
@@ -158,7 +151,7 @@ def store_book_details(data_path, book_tuples):
         part = part[:-1] + '\n'
         csv_string += part
 
-    with open(os.path.join(data_path, 'wikisource.csv'), 'w') as file:
+    with open(os.path.join(str(data_path), 'wikisource.csv'), 'w') as file:
         file.write(csv_string)
 
 
@@ -179,7 +172,7 @@ def store_book_chapters(data_path, book_tuples, force):
         chapter_list = []
 
         for chapter_tuple in book_tuple[7]:
-            chapter_name = make_path_safe('_'.join(chapter_tuple[0].split('/')[1:]))
+            chapter_name = path_util.make_path_safe('_'.join(chapter_tuple[0].split('/')[1:]))
 
             chapter_path = os.path.join(book_path, chapter_name + '.txt')
 
@@ -220,31 +213,22 @@ def download_wikisource(data_path, force=False):
     return book_details, chapter_matrix
 
 
-# Example of call
-local_data_path = os.path.join(os.getcwd(), '..', 'data')
-book_details, chapter_matrix = download_wikisource(local_data_path, False)
+def create_wikisource_json():
+    headers = ["url", "title", "author", "publishing_year", "recommended_age", "chapter_count", "full_text_root_path"]
 
-print(chapter_matrix)
+    books, chapters = download_wikisource(str(path_util.data_root()), True)
 
-conn, _ = create_connection()
+    zipped = zip(books, chapters)
 
-cursor = conn.cursor()
+    wikisource_json = []
+    for (book, chapter) in zipped:
+        book_json = {}
+        for index, header in enumerate(headers):
+            book_json[header] = book[index]
+        book_json['chapters'] = chapter
+        wikisource_json.append(book_json)
 
-indexed_tuples = []
-for index, book_tuple in enumerate(book_details):
-    print(book_tuple)
-    indexed_tuples.append((index,) + book_tuple[:-1])
+    with open(path_util.data_root() / 'wikisource.json', 'w') as file:
+        file.write(str(json.dumps(wikisource_json)))
 
-
-chapter_tuples = []
-for book_index, chapter_list in enumerate(chapter_matrix):
-    for chapter_index, chapter in enumerate(chapter_list):
-        chapter_tuples.append(str((book_index, chapter_index, 0, chapter)))
-
-
-cursor.executemany("INSERT INTO book VALUES (?,?,?,?,?,?,?,?)", indexed_tuples)
-# cursor.execute("INSERT INTO chapter VALUES " + tuple_string)
-conn.commit()
-
-for row in cursor.execute("SELECT * FROM book"):
-    print(row)
+    return wikisource_json

@@ -1,8 +1,8 @@
 import sqlite3
-
+from util import path
 
 def create_connection():
-    conn = sqlite3.connect("wikisource.db")
+    conn = sqlite3.connect(path.data_root() / "wikisource.db")
 
     cursor = conn.cursor()
 
